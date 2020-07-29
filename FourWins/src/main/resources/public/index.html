@@ -1,0 +1,114 @@
+<html>
+<head>
+    <title>Tic-Tac-Toe</title>
+</head>
+<body onload="sendRequestGET('newgame')">
+
+<script type="text/javascript">
+    /* Hier werden HTTP-Request (GET-Methode) versendet
+       und als Antwort stets der innere Teil der
+       Tabelle mit dem TicTacToe-Spielbrett erwartet
+    */
+    var http = new XMLHttpRequest();
+
+    function sendRequestGET(path = '', query = '') {
+        http.open('GET', path + '?' + query);
+        http.send();
+    }
+
+    http.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            document.getElementById('board').innerHTML = this.responseText;
+        }
+    }
+
+    /* Diese Funktionen sind Beispiele, wie der
+       Aufruf an `sendRequestGET` delegiert wird.
+    */
+    function sendMove(field) {
+        sendRequestGET('move', 'pos=' + field);
+    }
+
+    function loadInnerTable() {
+        sendRequestGET('rows');
+    }
+
+</script>
+
+<center>
+    <button class="button" type="button"
+            onclick="sendRequestGET('newgame')">New Game!
+    </button>
+</center>
+
+<table id='interaction'>
+    <tr>
+        <td onclick="sendMove(0)"></td>
+        <td onclick="sendMove(1)"></td>
+        <td onclick="sendMove(2)"></td>
+        <td onclick="sendMove(3)"></td>
+        <td onclick="sendMove(4)"></td>
+        <td onclick="sendMove(5)"></td>
+        <td onclick="sendMove(6)"></td>
+    </tr>
+</table>
+
+<table id='board'>
+
+</table>
+
+<center>
+    <button class="button" type="button"
+            onclick="sendRequestGET('undo')">Undo move
+    </button>
+</center>
+
+
+</body>
+</html>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  #board {
+    padding: 0px;
+    margin: 5  auto 0;
+  }
+  #board tr td {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #1c1c1c;
+    font-family: Helvetica;
+    font-size: 30px;
+    text-align: center;
+  }
+  #interaction {
+    padding: 0px;
+    margin: 20  auto 0;
+  }
+
+  #interaction tr td {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #1c1c1c;
+    font-family: Helvetica;
+    font-size: 30px;
+    text-align: center;
+  }
+
+  #interaction tr td:hover {
+    background: #e4e4e4;
+    cursor: pointer;
+  }
+}
+
+
+
+</style>
