@@ -29,38 +29,71 @@ class FourWins {
         return boardData[move] == 0
     }
 
-    fun AlphaBeta(depth: Int, alpha: Int, beta: Int): IntArray {
+    fun AlphaBeta( alpha: Int, beta: Int): IntArray {
 
         var vAlpha = alpha
+        var vBeta = beta
         //Check for draw game
-        if (depth == 0)
-            return intArrayOf(Evaludate(), lastindex)
-        var principalVariationKnot = false
+        if (GetMoveCount() == 42)
+            return intArrayOf(0, lastindex)
 
-        var bestMove = intArrayOf(MIN_VALUE, -1)
-
-        var possibleMoves = GetPossibleMoves()
-        var value = 0
-        for (move in possibleMoves) {
-            var nextBoard = Move(move)
-            if (principalVariationKnot) {
-                value = -nextBoard.AlphaBeta(depth - 1, -vAlpha - 1, -vAlpha)
-                if (value > vAlpha && vAlpha < beta)
-                    value = -nextBoard.AlphaBeta(depth - 1, -beta, -value)
-            } else {
-                value = -nextBoard.AlphaBeta(depth - 1, -beta, -vAlpha)
-            }
-            if (value > bestMove[0]) {
-                if (value >= beta)
-                    return intArrayOf(value, move)
-                bestMove = intArrayOf(value, move)
-                if (value > vAlpha) {
-                    vAlpha = value
-                    principalVariationKnot = true
+        for (position in 0..5) {
+            if (IsValidMove(position)) {
+                var move = Move(position)
+                if (move.CheckForWinCondition() == 1) {
+                    return intArrayOf(Evaluate(), move.lastindex)
                 }
             }
         }
-        return bestMove
+        var max = (columnSize * rowsize - 1 - GetMoveCount()) / 2
+
+        if (vBeta > max) {
+            vBeta = max
+            if (vAlpha >= vBeta) return intArrayOf(vBeta, lastindex)
+        }
+        for (position in 0..6) {
+            if (IsValidMove(position)) {
+                var move = Move(position)
+                var score = move.AlphaBeta( -vAlpha, -vBeta)
+                score[0] = -score[0]
+                if (score[0] >= vBeta) return score
+                if (score[0] > vAlpha) vAlpha = score[0]
+            }
+        }
+        return intArrayOf(vAlpha, lastindex)
+        //   if (depth == 0)
+        //     return intArrayOf(Evaluate(), lastindex)
+        /*  var principalVariationKnot = false
+
+          var bestMove = intArrayOf(MIN_VALUE, -1)
+
+          var possibleMoves = GetPossibleMoves()
+          var value = IntArray(2)
+          for (move in possibleMoves) {
+              var nextBoard = Move(move)
+              if (principalVariationKnot) {
+                  value = nextBoard.AlphaBeta(depth - 1, -vAlpha - 1, -vAlpha)
+                  value[0] * -1
+                  if (value[0] > vAlpha && vAlpha < beta) {
+                      value[0] = -(value[0])
+                      value = nextBoard.AlphaBeta(depth - 1, -beta, value[0])
+                      value[0] * -1
+                  }
+              } else {
+                  value = nextBoard.AlphaBeta(depth - 1, -beta, -vAlpha)
+                  value[0] * -1
+              }
+              if (value[0] > bestMove[0]) {
+                  if (value[0] >= beta)
+                      return intArrayOf(value[0], move)
+                  bestMove = intArrayOf(value[0], move)
+                  if (value[0] > vAlpha) {
+                      vAlpha = value[0]
+                      principalVariationKnot = true
+                  }
+              }
+          }*/
+        //  return bestMove
     }
 
     //TODO: Rework instead of calculating it on each call save on each call how many space in each column is reaming
@@ -84,12 +117,13 @@ class FourWins {
         if (IsValidMove(pos)) {
             for (row in 5 downTo 0) {
                 var index = row * columnSize + pos
+                // println("try to go for index : " +  row + "|" + pos + "|"+ index)
                 if (boardData[index] == 0) {
                     newboard.boardData[index] = currentPlayer;
-                    var matchstate = newboard.CheckForWinCondition()
                     newboard.lastindex = index;
-                    if (matchstate == 1)
-                        println("Jesus we have a win condition")
+                    var matchstate = newboard.CheckForWinCondition()
+                    /* if (matchstate == 1)
+                         println("Jesus we have a win condition")*/
                     newboard.currentPlayer = -currentPlayer;
                     break
                     //println(String.format("set something to int %d",index))
@@ -106,10 +140,11 @@ class FourWins {
         return prevBoard
     }
 
-    private fun Evaludate(): Int {
-
-
-        return 0
+    private fun Evaluate(): Int {
+        var value = 0
+        if (CheckForWinCondition() == 1)
+            value = 1000
+        return  (lastindex - GetMoveCount()) / 2
     }
 
     private fun GenericStreakCheck(lastindex: Int, steps: Int, streak: Int): Int {
@@ -138,17 +173,20 @@ class FourWins {
          check=GenericCheck(lastindex,columnSize+1)
          check=GenericCheck(lastindex,columnSize-1)*/
         val rows = arrayOf<Int>(columnSize, rowsize, columnSize + 1, (1))
-        return Arrays.stream(rows).parallel().anyMatch() { row: Int ->
-            GenericStreakCheck(lastindex, row, 4) == 1
-        } as Int
+        var result = Arrays.stream(rows).parallel().anyMatch() { row: Int ->
+            (GenericStreakCheck(lastindex, row, 4) == 1)
+        }
+        return if (result)
+            1
+        else
+            0
     }
 
     fun GetMoveCount(): Int {
         var moves = 0
-        if (prevBoard != null){
-           moves += prevBoard?.GetMoveCount() as Int
-        }
-        else moves = 1
+        if (prevBoard != null) {
+            moves += prevBoard?.GetMoveCount() as Int
+        } else moves = 1
         return moves
     }
 

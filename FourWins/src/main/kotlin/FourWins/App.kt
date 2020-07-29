@@ -5,56 +5,137 @@ package FourWins
 
 import io.javalin.Javalin
 import io.javalin.http.Context
+import io.javalin.websocket.WsConnectContext
+import io.javalin.websocket.WsContext
 
+import org.eclipse.jetty.server.session.DefaultSessionCache
+import org.eclipse.jetty.server.session.FileSessionDataStore
+import org.eclipse.jetty.server.session.SessionHandler
+import java.io.File
+import java.sql.Time
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class App {
+    private val userUsernameMap = ConcurrentHashMap<WsContext, String>()
+    private var nextUserNumber = 1
+    lateinit var session :WsConnectContext
+    var game: FourWins
+    var canPlay = true
 
     init {
-        var game = FourWins()
+        game = FourWins()
         val app = Javalin.create { config ->
             config.addStaticFiles("/public")
+
         }.start(7070)
 
-
-
-        //game.toString()
-        app.get("/move") { ctx: Context ->
-            val input = ctx.queryParam("pos")!!.toInt()
-            // if (game.IsValidMove(input))
-            game = game.Move(input)
-            ctx.result(game.toString())
-        }
-        app.get("/newgame") { ctx: Context ->
-            game = FourWins()
-            ctx.result(game.toString())
-        }
-        app.get("/undo") { ctx: Context ->
-
-            var prev = game.Undo()
-            if (prev != null) {
-                //println("Sucessfull undo move")
-                game = prev as FourWins
-            } else {
-                //println("Null no prev board found")
-                //ctx.result("Null no prev board found")
+        app.apply {
+            ws("/") { ws ->
+                ws.onConnect { ctx ->
+                    session = ctx
+                    ctx.send("0 " + game.toString())
+                }
+                ws.onClose { ctx ->
+                    game = FourWins()
+                }
+                /*   ws.onMessage { ctx ->
+                       broadcastMessage(userUsernameMap[ctx]!!, ctx.message())
+                   }*/
             }
-            ctx.result(game.toString())
+
+            //game.toString()
+            app.get("/move") { ctx: Context ->
+                if (canPlay) {
+                    val input = ctx.queryParam("pos")!!.toInt()
+                    // if (game.IsValidMove(input))
+                    game = game.Move(input)
+                    ctx.result(game.toString())
+                    canPlay = false
+                    ProceedAI()
+
+                } else {
+                    session.send("1 " + "Its not your turn! AI still calculating next move")
+                }
+            }
+            app.get("/newgame") { ctx: Context ->
+                game = FourWins()
+                ctx.result(game.toString())
+            }
+            app.get("/render") { ctx: Context ->
+                ctx.result(game.toString())
+            }
+            app.get("/undo") { ctx: Context ->
+
+                var prev = game.Undo()
+                if (prev != null) {
+                    //println("Sucessfull undo move")
+                    game = prev as FourWins
+                } else {
+                    //println("Null no prev board found")
+                    //ctx.result("Null no prev board found")
+                }
+                ctx.result(game.toString())
+            }
+
+            app.get("/rows") { ctx: Context ->
+                ctx.result(game.toString())
+            }
+            app.post("/") { ctx ->
+                // some code
+                game.toString()
+            }
         }
-        app.get("/rows") { ctx: Context ->
-            ctx.result(game.toString())
-        }
-        app.post("/") { ctx ->
-            // some code
-            game.toString()
-        }
+
+
     }
-    var mode = 0
+
+    fun ProceedAI() {
+        if (session != null) {
+        //    session.send("1 " + "AI is calculating next move")
+        }
+        //        return negamax(P, -1, 1);
+        var startTime = System.nanoTime()
+        var nextMove = game.AlphaBeta( -21, 21)
+        game = game.Move(nextMove[1]%7)
+        var totalTime = (System.nanoTime() - startTime)
+        if (session != null) {
+           session.send("1" + "Time for calculation : " + totalTime)
+            session.send("0 " + game.toString())
+          //  println("Send: "+ game.toString())
+        }
+        canPlay = true
+    }
+
+    fun fileSessionHandler() = SessionHandler().apply { // create the session handler
+        sessionCache = DefaultSessionCache(this).apply { // attach a cache to the handler
+            sessionDataStore = FileSessionDataStore().apply { // attach a store to the cache
+                val baseDir = File(System.getProperty("java.io.tmpdir"))
+                this.storeDir = File(baseDir, "javalin-session-store").apply { mkdir() }
+            }
+        }
+        httpOnly = true
+        // make additional changes to your SessionHandler here
+    }
+
+    // hopefully your future is less pointless than this:
+    private fun getFuture() = CompletableFuture<String>().apply {
+        Executors.newSingleThreadScheduledExecutor().schedule({ this.complete("Hello World!") }, 5, TimeUnit.SECONDS)
+        // Executors.newSingleThreadScheduledExecutor().schedule(this.)
+    }
+
+    private fun CalcualteAIMove() {
+
+    }
 
 
 }
 
 fun main(args: Array<String>) {
     App()
-
-
 }
+
