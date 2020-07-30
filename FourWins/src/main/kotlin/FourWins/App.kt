@@ -7,23 +7,17 @@ import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
-
 import org.eclipse.jetty.server.session.DefaultSessionCache
 import org.eclipse.jetty.server.session.FileSessionDataStore
 import org.eclipse.jetty.server.session.SessionHandler
-import java.io.File
-import java.sql.Time
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import kotlin.coroutines.*
+
+import kotlin.system.measureTimeMillis
 
 class App {
-    private val userUsernameMap = ConcurrentHashMap<WsContext, String>()
+    private val userUsernameMap = HashMap<WsContext, String>()
     private var nextUserNumber = 1
-    lateinit var session :WsConnectContext
+    lateinit var session: WsConnectContext
     var game: FourWins
     var canPlay = true
 
@@ -54,9 +48,11 @@ class App {
                     val input = ctx.queryParam("pos")!!.toInt()
                     // if (game.IsValidMove(input))
                     game = game.Move(input)
-                    ctx.result(game.toString())
+                    session.send("0 " + game.toString())
+                 //   ctx.result(game.toString())
                     canPlay = false
-                    ProceedAI()
+                    startThread()
+                    //ProceedAI()
 
                 } else {
                     session.send("1 " + "Its not your turn! AI still calculating next move")
@@ -93,40 +89,66 @@ class App {
 
 
     }
+    fun startThread(){
+        val thread = Thread(AIProceeding(session,game,this))
+        thread.start()
+    }
+
+    class AIProceeding : Thread {
+        lateinit var session: WsConnectContext
+        lateinit var game: FourWins
+        lateinit var app: App
+
+        constructor(session: WsConnectContext, game: FourWins, app: App) {
+            this.session = session
+            this.game = game
+            this.app = app
+        }
+
+        override fun run() {
+            if (session != null) {
+                //    session.send("1 " + "AI is calculating next move")
+            }
+
+            //        return negamax(P, -1, 1);
+            println("Start thinking...")
+            var startTime = System.nanoTime()
+            game.SetStartTime(startTime, 10)
+            var nextMove = game.newAlphaBeta(20, -21, 21, true, 8)
+            app.game = game.Move(nextMove[1] % 7)
+            var totalTime = (System.nanoTime() - startTime)
+            val elapsedTimeInSecond = totalTime.toDouble() / 1000000000
+            if (session != null) {
+                session.send("1" + "Time for calculation : " + elapsedTimeInSecond)
+                session.send("0 " + app.game.toString())
+                //  println("Send: "+ game.toString())
+            }
+            app.game.SaveDB()
+            app.canPlay = true
+        }
+    }
 
     fun ProceedAI() {
         if (session != null) {
-        //    session.send("1 " + "AI is calculating next move")
+            //    session.send("1 " + "AI is calculating next move")
         }
+
         //        return negamax(P, -1, 1);
+        println("Start thinking...")
         var startTime = System.nanoTime()
-        var nextMove = game.AlphaBeta( -21, 21)
-        game = game.Move(nextMove[1]%7)
+        game.SetStartTime(startTime, 10)
+        var nextMove = game.AlphaBeta(20, -21, 21, true, 8)
+        game = game.Move(nextMove[1] % 7)
         var totalTime = (System.nanoTime() - startTime)
+        val elapsedTimeInSecond = totalTime.toDouble() / 1000000000
         if (session != null) {
-           session.send("1" + "Time for calculation : " + totalTime)
+            session.send("1" + "Time for calculation : " + elapsedTimeInSecond)
             session.send("0 " + game.toString())
-          //  println("Send: "+ game.toString())
+            //  println("Send: "+ game.toString())
         }
         canPlay = true
     }
 
-    fun fileSessionHandler() = SessionHandler().apply { // create the session handler
-        sessionCache = DefaultSessionCache(this).apply { // attach a cache to the handler
-            sessionDataStore = FileSessionDataStore().apply { // attach a store to the cache
-                val baseDir = File(System.getProperty("java.io.tmpdir"))
-                this.storeDir = File(baseDir, "javalin-session-store").apply { mkdir() }
-            }
-        }
-        httpOnly = true
-        // make additional changes to your SessionHandler here
-    }
-
-    // hopefully your future is less pointless than this:
-    private fun getFuture() = CompletableFuture<String>().apply {
-        Executors.newSingleThreadScheduledExecutor().schedule({ this.complete("Hello World!") }, 5, TimeUnit.SECONDS)
-        // Executors.newSingleThreadScheduledExecutor().schedule(this.)
-    }
 
     private fun CalcualteAIMove() {
 
@@ -135,7 +157,25 @@ class App {
 
 }
 
+class Pfannkuchen() {
+    var _haltbar = true
+    var _name = "";
+
+
+    fun Abgelaufen() {
+        _haltbar = false
+    }
+
+    override fun toString(): String {
+        return _name + "Pfannkuchen haltbar? " + _haltbar
+    }
+}
+
+
 fun main(args: Array<String>) {
     App()
+
 }
+
+
 
