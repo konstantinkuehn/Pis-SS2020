@@ -35,16 +35,17 @@ Um einen Zug auszuführen muss in eins der Felder, der ersten Reihe gedrückt we
 
 ### Dateiübersicht
 
-    \build.gradle
-    \README.md
-    \bin\main\public\index.html
-    \bin\main\TicTacToe\App.kt
-    \bin\main\TicTacToe\T3.kt
-    \src\main\kotlin\FourWins\App.kt
-    \src\main\kotlin\FourWins\FourWins.kt
-     \src\main\kotlin\FourWins\GameEngine.kt
-    \src\main\resources\public\index.html
-     \src\main\resources\public\com.js
+
+	\build.gradle
+	\README.md
+	\Screenshot.png
+	\src\main\kotlin\FourWins\App.kt
+	\src\main\kotlin\FourWins\FourWins.kt
+	\src\main\kotlin\FourWins\GameEngine.kt
+	\src\main\resources\public\com.js
+	\src\main\resources\public\index.html
+	\src\test\kotlin\FourWins\AppTest.kt
+
 
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
