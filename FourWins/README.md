@@ -88,7 +88,7 @@ aufgerufen werden, um die StartZeit  und die Maximaldauer  zu übergeben. Erst d
 Sobald die maximale Tiefe erreicht worden ist oder die maximal berechnungsdauer, wird der beste Zug zurückgegeben.
     
 Der erste Wert liefert die Punktzahl zurück und der zweite das Spielfeld, um diesen Zug auch final auszuführen, muss man die Methode 
- ```kotlin
+```kotlin
      override fun Move(pos: Int,debug:Boolean): FourWins
   ```
 ausführen, um hier die richtige Position zu bekommen, müssen wir das erhaltene Feld von der AlphaBeta funktion mit %7 gegenrechnen, um die relevante Spalte zu erhalten.
@@ -111,7 +111,8 @@ In Zeile 12-15 wird eine [statische Variable](https://medium.com/@ansujain/kotli
     }
 ```
     
-Für die eigene Datenbank dienen die folgenden Methoden: ```kotlin
+Für die eigene Datenbank dienen die folgenden Methoden: 
+```kotlin
     //will save the current board
     fun SaveDB()
     //will load the current board
@@ -126,7 +127,7 @@ Hierbei ist zu beachten das die Datenbank nach jedem AI Zug abgespeichert wird u
     
     
 Als Kommunikation zwischen Seite und Backend wird ein Session System genutzt auf Basis von dem [Chat Tutorial]().
-    ```js 
+```js 
          ws.onmessage = messageEvent => {
      var id = messageEvent.data.substring(0,1)
      var mes = messageEvent.data.substring(1)
@@ -146,7 +147,7 @@ Als Kommunikation zwischen Seite und Backend wird ein Session System genutzt auf
 Hier wird eine erhalten Nachricht empfangen und verarbeitet. 
 Ich habe der Nachricht die gesendet wird ein Int als ID hinzugefügt, um etnscheiden zu können was ich mit dieser Nachricht ansprechen möchte.
     
-    ```kotlin
+ ```kotlin
         app.apply {
             ws("/") { ws ->
                 ws.onConnect { ctx ->
@@ -160,7 +161,7 @@ Ich habe der Nachricht die gesendet wird ein Int als ID hinzugefügt, um etnsche
 ``` 
 Um Nachrichten zu verschicken cache ich jegliche Verbindung und sende auch zugleiche den aktuellen Stand des Brettes.
     
-    ```kotlin
+ ```kotlin
                         session.send("ID"+ " " + message)
 
 ```
