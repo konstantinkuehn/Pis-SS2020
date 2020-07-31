@@ -2,75 +2,23 @@
 <head>
     <title>Tic-Tac-Toe</title>
 </head>
-<body >
-
-<script type="text/javascript">
-    /* Hier werden HTTP-Request (GET-Methode) versendet
-       und als Antwort stets der innere Teil der
-       Tabelle mit dem TicTacToe-Spielbrett erwartet
-    */
-    var http = new XMLHttpRequest();
-
-    function sendRequestGET(path = '', query = '') {
-        http.open('GET', path + '?' + query);
-        http.send();
-    }
-
-    http.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById('board').innerHTML = this.responseText;
-        }
-    }
-
-    /* Diese Funktionen sind Beispiele, wie der
-       Aufruf an `sendRequestGET` delegiert wird.
-    */
-    function sendMove(field) {
-        sendRequestGET('move', 'pos=' + field);
-    }
-
-    function loadInnerTable() {
-        sendRequestGET('rows');
-    }
-
-      window.onload = setupWebSocket;
-      function renderBoard(){
-
-    sendRequestGET('render')
-      }
-    function setupWebSocket() {
+<body>
 
 
+<script src="com.js"></script>
 
-    const ws = new WebSocket(`ws://localhost:7070/`);
-           ws.onopen = event => {
-            console.log('connection established');
-        }
-     ws.onmessage = messageEvent => {
-     var id = messageEvent.data.substring(0,1)
-     var mes = messageEvent.data.substring(1)
-            if(id ==0)
-            {
-          renderBoard()
-            } else if(id ==1)
-            {
-            document.getElementById('timeFeedback').innerHTML = mes;
-            }
-
-        }
-    }
-
-
-
-
-
-
-
-</script>
-
-<center>
+<center id='controlBar'>
     <button class="button" type="button"
             onclick="sendRequestGET('newgame')">New Game!
+    </button>
+    <button class="button" type="button"
+            onclick="sendRequestGET('undo')">Undo move
+    </button>
+    <button class="button" type="button"
+            onclick="sendRequestGET('flip')"> Flip Color
+    </button>
+    <button class="button" type="button"
+            onclick="sendRequestGET('tests')"> Run Tests
     </button>
 </center>
 
@@ -89,12 +37,8 @@
 <table id='board'>
 
 </table>
-
-<div id="timeFeedback"></div>
 <center>
-    <button class="button" type="button"
-            onclick="sendRequestGET('undo')">Undo move
-    </button>
+    <div id="timeFeedback"></div>
 </center>
 
 
@@ -111,7 +55,11 @@
     border-collapse: collapse;
     border-spacing: 0;
   }
-  #board {
+  #controlBar {
+    padding: 0px;
+    margin: 25  auto 0;
+  }
+    #board {
     padding: 0px;
     margin: 5  auto 0;
   }
@@ -142,6 +90,8 @@
     cursor: pointer;
   }
 }
+
+
 
 
 

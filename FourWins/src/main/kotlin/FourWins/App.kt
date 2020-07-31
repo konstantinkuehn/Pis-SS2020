@@ -7,18 +7,12 @@ import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
-import org.eclipse.jetty.server.session.DefaultSessionCache
-import org.eclipse.jetty.server.session.FileSessionDataStore
-import org.eclipse.jetty.server.session.SessionHandler
-import kotlin.coroutines.*
-
-import kotlin.system.measureTimeMillis
 
 class App {
     private val userUsernameMap = HashMap<WsContext, String>()
     private var nextUserNumber = 1
     lateinit var session: WsConnectContext
-    var game: FourWins
+    var game: GameEngine
     var canPlay = true
 
     init {
@@ -35,11 +29,8 @@ class App {
                     ctx.send("0 " + game.toString())
                 }
                 ws.onClose { ctx ->
-                    game = FourWins()
+                    //   game = FourWins()
                 }
-                /*   ws.onMessage { ctx ->
-                       broadcastMessage(userUsernameMap[ctx]!!, ctx.message())
-                   }*/
             }
 
             //game.toString()
@@ -48,11 +39,18 @@ class App {
                     val input = ctx.queryParam("pos")!!.toInt()
                     // if (game.IsValidMove(input))
                     game = game.Move(input)
-                    session.send("0 " + game.toString())
-                 //   ctx.result(game.toString())
-                    canPlay = false
-                    startThread()
-                    //ProceedAI()
+                    if (game.MatchWon()) {
+                        session.send("0 " + game.toString())
+                        session.send("1 " + "You win")
+                        session.send("2 " + GetInteractionRenderer())
+                        println("Player won round")
+                    } else {
+                        session.send("0 " + game.toString())
+                        //   ctx.result(game.toString())
+                        canPlay = false
+                        startThread()
+                    }
+                    // ProceedAI()
 
                 } else {
                     session.send("1 " + "Its not your turn! AI still calculating next move")
@@ -60,9 +58,20 @@ class App {
             }
             app.get("/newgame") { ctx: Context ->
                 game = FourWins()
+                canPlay = true
+                session.send("2 " + GetInteractionRenderer(true))
                 ctx.result(game.toString())
             }
             app.get("/render") { ctx: Context ->
+                ctx.result(game.toString())
+            }
+
+            app.get("/tests") { ctx: Context ->
+                println("Execute tests")
+            }
+            app.get("/flip") { ctx: Context ->
+                println("Flipped Colors")
+                game.FlipColor()
                 ctx.result(game.toString())
             }
             app.get("/undo") { ctx: Context ->
@@ -89,17 +98,20 @@ class App {
 
 
     }
-    fun startThread(){
-        val thread = Thread(AIProceeding(session,game,this))
+
+    lateinit var thread: Thread
+    fun startThread() {
+        thread = Thread(AIProceeding(session, game, this))
         thread.start()
     }
 
+
     class AIProceeding : Thread {
         lateinit var session: WsConnectContext
-        lateinit var game: FourWins
+        lateinit var game: GameEngine
         lateinit var app: App
 
-        constructor(session: WsConnectContext, game: FourWins, app: App) {
+        constructor(session: WsConnectContext, game: GameEngine, app: App) {
             this.session = session
             this.game = game
             this.app = app
@@ -111,47 +123,59 @@ class App {
             }
 
             //        return negamax(P, -1, 1);
-            println("Start thinking...")
-            var startTime = System.nanoTime()
-            game.SetStartTime(startTime, 10)
-            var nextMove = game.newAlphaBeta(20, -21, 21, true, 8)
-            app.game = game.Move(nextMove[1] % 7)
-            var totalTime = (System.nanoTime() - startTime)
-            val elapsedTimeInSecond = totalTime.toDouble() / 1000000000
-            if (session != null) {
-                session.send("1" + "Time for calculation : " + elapsedTimeInSecond)
-                session.send("0 " + app.game.toString())
-                //  println("Send: "+ game.toString())
+            if (!game.MatchWon()) {
+                session.send("2 " + app.GetInteractionRenderer())
+
+                var startTime = System.nanoTime()
+                game.SetStartTime(startTime, 2)
+                var nextMove = game.CalculateBestMove(1000, -21, 21, true)
+                app.game = game.Move(nextMove[1] % 7)
+                var totalTime = (System.nanoTime() - startTime)
+                val elapsedTimeInSecond = totalTime.toDouble() / 1000000000
+                if (session != null) {
+
+                    if (app.game.MatchWon()) {
+                        session.send("2 " + app.GetInteractionRenderer())
+                        session.send("1 " + "You Lost")
+                        session.send("0 " + app.game.toString())
+
+                    } else {
+
+                        session.send("1" + "Time for calculation : " + elapsedTimeInSecond)
+                        session.send("0 " + app.game.toString())
+                    }
+                    //  println("Send: "+ game.toString())
+                }
+                app.game.SaveDB()
+                app.canPlay = true
+                session.send("2 " + app.GetInteractionRenderer())
+
             }
-            app.game.SaveDB()
-            app.canPlay = true
         }
     }
 
-    fun ProceedAI() {
-        if (session != null) {
-            //    session.send("1 " + "AI is calculating next move")
+    fun GetInteractionRenderer(force:Boolean = false): String {
+
+        var toReturn = ""
+        toReturn += "<tr>\n"
+        for (index in 0..6) {
+            var value: Int = 0
+            value = if (game.MatchWon() || !canPlay)
+                1
+            else
+                0
+
+            if(force){
+                value= 0
+            }
+            when (value) {
+                0 -> toReturn += String.format("  <td onclick=\"sendMove(%d)\" bgcolor=\"%s\"></td>\n", index, "white")
+                1 -> toReturn += String.format("  <td bgcolor=\"%s\" onMouseOver=\"this.style.backgroundColor='%s'\"></td>\n", "black", "black")
+            }
+
         }
-
-        //        return negamax(P, -1, 1);
-        println("Start thinking...")
-        var startTime = System.nanoTime()
-        game.SetStartTime(startTime, 10)
-        var nextMove = game.AlphaBeta(20, -21, 21, true, 8)
-        game = game.Move(nextMove[1] % 7)
-        var totalTime = (System.nanoTime() - startTime)
-        val elapsedTimeInSecond = totalTime.toDouble() / 1000000000
-        if (session != null) {
-            session.send("1" + "Time for calculation : " + elapsedTimeInSecond)
-            session.send("0 " + game.toString())
-            //  println("Send: "+ game.toString())
-        }
-        canPlay = true
-    }
-
-
-    private fun CalcualteAIMove() {
-
+        toReturn += "</tr>\n"
+        return toReturn
     }
 
 
