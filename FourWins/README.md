@@ -23,8 +23,7 @@ Ich habe die Zulassung für PiS im SoSe 201> bei Herrn Herzberg erhalten.
 
 ### Spielregeln
 
-
-    Das Ziel des Spieles ist es, vor dem Gegner 4 eigene Steine in Horizontaler, Vertikaler oder Diagonalen Reihe zu platzieren und den Gegner von gleichigem abzuhalten.
+Das Ziel des Spieles ist es, vor dem Gegner 4 eigene Steine in Horizontaler, Vertikaler oder Diagonalen Reihe zu platzieren und den Gegner von gleichigem abzuhalten.
 
 ### Bedienungsanleitung
 
@@ -72,18 +71,18 @@ Ergebnis   |  48 |  21 |  12 |   39 |   20 | **140%**
 
     
     
-    ### Erläuterung
+### Erläuterung
     
-    Innerhalb des GameEngine.kt Scipt befindet sich das Interface welches in der App.kt für 4Connect benutzt worden ist. 
+Innerhalb des GameEngine.kt Scipt befindet sich das Interface welches in der App.kt für 4Connect benutzt worden ist. 
     
-    Der [AlphaBeta](https://github.com/PascalPons/connect4/blob/part4/solver.cpp#L42) Algorithmus ist unter dem Namen```kotlin
+Der [AlphaBeta](https://github.com/PascalPons/connect4/blob/part4/solver.cpp#L42) Algorithmus ist unter dem Namen```kotlin
     override fun CalculateBestMove(depth: Int, alpha: Int, beta: Int, preventWin: Boolean): IntArray 
     ``` in der FourWins.kt Datei in zeile 93 zu finden. Hier wird in einem IntArray der Score array[0] und der zugehörige Zug array[1] abgespeichert.
-    Bevor ein Zug mit der AI ausgeführt werden kann, muss die Methode 
+ Bevor ein Zug mit der AI ausgeführt werden kann, muss die Methode 
     ```kotlin
 fun SetStartTime(time: Long, threshold: Int) 
 ``` aufgerufen werden, um die StartZeit  und die Maximaldauer  zu übergeben. Erst danach kann CalculateBestMove aufgerufen werden.
-    Sobald die maximale Tiefe erreicht worden ist oder die maximal berechnungsdauer, wird der beste Zug zurückgegeben.
+ Sobald die maximale Tiefe erreicht worden ist oder die maximal berechnungsdauer, wird der beste Zug zurückgegeben.
     
     Der erste Wert liefert die Punktzahl zurück und der zweite das Spielfeld, um diesen Zug auch final auszuführen, muss man die Methode ```kotlin
      override fun Move(pos: Int,debug:Boolean): FourWins``` ausführen, um hier die richtige Position zu bekommen, müssen wir das erhaltene Feld von der AlphaBeta funktion mit %7 gegenrechnen, um die relevante Spalte zu erhalten.
