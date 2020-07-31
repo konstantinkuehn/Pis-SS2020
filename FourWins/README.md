@@ -51,14 +51,14 @@ Um einen Zug auszuführen muss in eins der Felder, der ersten Reihe gedrückt we
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
 Kotlin                           4            117             42            485
-XML                              6              0              0            299
+Markdown                         1             68              0            277
 Bourne Shell                     1             23             36            126
 HTML                             1             23              0             81
 DOS Batch                        1             26              2             76
 JavaScript                       1             11              0             39
 Gradle                           2              9             22             22
 -------------------------------------------------------------------------------
-SUM:                            16            209            102           1128
+SUM:                            11            277            102           1106
 -------------------------------------------------------------------------------
 
     
