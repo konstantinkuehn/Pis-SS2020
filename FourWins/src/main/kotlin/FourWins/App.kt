@@ -50,6 +50,7 @@ class App {
                         canPlay = false
                         startThread()
                     }
+
                     // ProceedAI()
 
                 } else {
@@ -67,7 +68,7 @@ class App {
             }
 
             app.get("/tests") { ctx: Context ->
-                println("Execute tests")
+              proceedTests()
             }
             app.get("/flip") { ctx: Context ->
                 println("Flipped Colors")
@@ -148,6 +149,7 @@ class App {
                 }
                 app.game.SaveDB()
                 app.canPlay = true
+                app. game.PrintGameBoardInConsole()
                 session.send("2 " + app.GetInteractionRenderer())
 
             }
@@ -178,22 +180,124 @@ class App {
         return toReturn
     }
 
+    fun proceedTests(){
+        println("TEST 1")
+        var testOneStart = intArrayOf(
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,1,
+                0,0,0,0,0,0,1,
+                0,0,0,-1,-1,-1,1
+        )
+        TestOne(testOneStart,26)
+        println("TEST 2")
+        var testTwoStart = intArrayOf(
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,-1,1,
+                0,0,0,0,1,-1,1
+        )
+        TestTwo(testTwoStart,40,0)
+        println("TEST 3")
+        var testThreeStart = intArrayOf(
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,1,
+                0,0,0,0,0,-1,1
+        )
+        TestThree(testThreeStart,40,0,0)
+        println("TEST 4")
+
+        var testFourStart = intArrayOf(
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,
+                0,0,0,0,0,-1,0,
+                0,0,1,1,1,-1,0
+        )
+        TestFour(testFourStart,37)
+    }
+
+
+    fun TestOne(boardData:IntArray,lastMove:Int){
+        var game = FourWins(boardData,-1,lastMove-1)
+        println("Start Stellung:")
+        game.PrintGameBoardInConsole()
+        var startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        var nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        println("FINAL :")
+        game.PrintGameBoardInConsole()
+    }
+
+
+
+    fun TestTwo(boardData:IntArray,lastMove:Int,playerMove:Int){
+        var game = FourWins(boardData,-1,lastMove-1) //prev Move is the last move on the board
+        println("Start Stellung:")
+        game.PrintGameBoardInConsole()
+        var startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        var nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        game = game.Move(playerMove,true)
+        startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        println("FINAL :")
+        game.PrintGameBoardInConsole()
+    }
+
+
+    fun TestThree(boardData:IntArray,lastMove:Int,playerMove:Int,playerMovetwo: Int){
+        var game = FourWins(boardData,-1,lastMove-1) //prev Move is the last move on the board
+        println("Start Stellung:")
+        game.PrintGameBoardInConsole()
+        var startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        var nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        //=========== Spieler zieht als nächstes
+        game = game.Move(playerMove,true)
+        //=========== AI Zieht
+        startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        //=========== Spieler zieht als nächstes
+        game = game.Move(playerMovetwo,true)
+        //=========== AI Zieht
+        startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        println("FINAL :")
+        game.PrintGameBoardInConsole()
+    }
+
+    fun TestFour(boardData:IntArray,lastMove: Int){
+        var game = FourWins(boardData,-1,lastMove-1)
+        println("Start Stellung:")
+        game.PrintGameBoardInConsole()
+        var startTime = System.nanoTime()
+        game.SetStartTime(startTime, 2)
+        var nextMove = game.CalculateBestMove(1000, -21, 21, true)
+        game = game.Move(nextMove[1] % 7,true)
+        println("FINAL :")
+        game.PrintGameBoardInConsole()
+    }
+
 
 }
 
-class Pfannkuchen() {
-    var _haltbar = true
-    var _name = "";
-
-
-    fun Abgelaufen() {
-        _haltbar = false
-    }
-
-    override fun toString(): String {
-        return _name + "Pfannkuchen haltbar? " + _haltbar
-    }
-}
 
 
 fun main(args: Array<String>) {

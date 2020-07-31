@@ -4,6 +4,7 @@ import java.io.File
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.abs
 
 class FourWins : GameEngine {
 
@@ -17,6 +18,14 @@ class FourWins : GameEngine {
         boardData = (IntArray(42))
         currentPlayer = 1
         LoadDB()
+    }
+
+    constructor(oldData: IntArray, nextPlayer: Int,prevMove:Int) {
+        // println(prevBoard.toString())
+
+        lastindex = prevMove
+        currentPlayer = nextPlayer
+        this.boardData = oldData
     }
 
     constructor(oldData: FourWins) {
@@ -117,7 +126,7 @@ class FourWins : GameEngine {
                     FourWins.entries.put(relatedHash, score)
                     return score
 
-                } else if (preventWin ) { // If the next enemy move would be a win
+                } else if (preventWin) { // If the next enemy move would be a win
                     for (nextMove in 0..5) {
                         if (nextBoard.IsValidMove(nextMove)) {
                             var CheckForNext = nextBoard.Move(nextMove)
@@ -174,7 +183,7 @@ class FourWins : GameEngine {
     }
 
 
-    override fun Move(pos: Int): FourWins {
+    override fun Move(pos: Int,debug:Boolean): FourWins {
 
         var newBoard = FourWins(this)
         newBoard.SetStartTime(starTime, timeoutThreshold)
@@ -190,7 +199,11 @@ class FourWins : GameEngine {
                 }
             }
         }
-        //TODO: Maybe print out that no valid move is possible
+
+        if(debug){
+            println("Spieler " + currentPlayer + " nutzt spalte " + pos)
+            newBoard.PrintGameBoardInConsole()
+        }
 
         return newBoard
     }
@@ -244,11 +257,18 @@ class FourWins : GameEngine {
     }
 
     private fun GetMoveCount(): Int {
+
         var moves = 0
-        if (prevBoard != null) {
+        for (value in boardData){
+           moves += abs(value)
+       }
+      //  println("Counts: " + moves)
+        return  moves
+
+      /*  if (prevBoard != null) {
             moves += prevBoard?.GetMoveCount() as Int
         } else moves = 1
-        return moves
+        return moves*/
     }
 
     override fun toString(): String {
@@ -268,4 +288,16 @@ class FourWins : GameEngine {
         return toReturn
     }
 
+    override fun PrintGameBoardInConsole() {
+        for (row in 0..5) {
+            var toPrint = ""
+            for (column in 0..6) {
+                var index = column + (row * 7)
+                toPrint += " " + boardData[index] + " "
+            }
+            println(toPrint)
+        }
+
+    }
 }
+

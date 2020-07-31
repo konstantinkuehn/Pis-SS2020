@@ -12,8 +12,10 @@ interface GameEngine {
     fun MatchWon():Boolean
     fun SetStartTime(time: Long, threshold: Int)
 
-    fun Move(pos: Int) : GameEngine
+    fun Move(pos: Int,boolean: Boolean= false) : GameEngine
 
     fun Undo() : GameEngine?
     fun FlipColor()
+
+    fun PrintGameBoardInConsole()
 }
