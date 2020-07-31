@@ -83,7 +83,8 @@ Der [AlphaBeta](https://github.com/PascalPons/connect4/blob/part4/solver.cpp#L42
  Bevor ein Zug mit der AI ausgeführt werden kann, muss die Methode 
     ```kotlin
 fun SetStartTime(time: Long, threshold: Int) 
-``` aufgerufen werden, um die StartZeit  und die Maximaldauer  zu übergeben. Erst danach kann CalculateBestMove aufgerufen werden.
+``` 
+    aufgerufen werden, um die StartZeit  und die Maximaldauer  zu übergeben. Erst danach kann CalculateBestMove aufgerufen werden.
  Sobald die maximale Tiefe erreicht worden ist oder die maximal berechnungsdauer, wird der beste Zug zurückgegeben.
     
     Der erste Wert liefert die Punktzahl zurück und der zweite das Spielfeld, um diesen Zug auch final auszuführen, muss man die Methode ```kotlin
