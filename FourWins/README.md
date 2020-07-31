@@ -75,9 +75,11 @@ Ergebnis   |  48 |  21 |  12 |   39 |   20 | **140%**
     
 Innerhalb des GameEngine.kt Scipt befindet sich das Interface welches in der App.kt für 4Connect benutzt worden ist. 
     
-Der [AlphaBeta](https://github.com/PascalPons/connect4/blob/part4/solver.cpp#L42) Algorithmus ist unter dem Namen```kotlin
+Der [AlphaBeta](https://github.com/PascalPons/connect4/blob/part4/solver.cpp#L42) Algorithmus ist unter dem Namen
+    ```kotlin
     override fun CalculateBestMove(depth: Int, alpha: Int, beta: Int, preventWin: Boolean): IntArray 
-    ``` in der FourWins.kt Datei in zeile 93 zu finden. Hier wird in einem IntArray der Score array[0] und der zugehörige Zug array[1] abgespeichert.
+    ``` 
+  in der FourWins.kt Datei in zeile 93 zu finden. Hier wird in einem IntArray der Score array[0] und der zugehörige Zug array[1] abgespeichert.
  Bevor ein Zug mit der AI ausgeführt werden kann, muss die Methode 
     ```kotlin
 fun SetStartTime(time: Long, threshold: Int) 
