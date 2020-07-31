@@ -62,7 +62,7 @@ Um einen Zug auszuführen muss in eins der Felder, der ersten Reihe gedrückt we
     -------------------------------------------------------------------------------
 
     
-    ## Spiel-Engine (ENG)
+## Spiel-Engine (ENG)
 
 Feature    | AB  | H | K  | eD   | IM+I | Summe
 -----------|-----|-----|-----|-----|------|----
