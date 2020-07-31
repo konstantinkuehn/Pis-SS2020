@@ -330,13 +330,13 @@ FINAL :
  0  -1  1  1  1  -1  0 
 ~~~
     
-    ## Umsetzung der GUI
+## Umsetzung der GUI
 Hier wurde als Basis das Tic Tac Toe UI genommen und abgeändert. So habe ich einen Bereich für Text Output angelegt der Informationen anzeigt wie bspw. die Sekunden, die die AI brauchte um ein Zug zu berechnen, aber auch um über Gewinn oder Niederlage zu infomieren.
 In der ersten Reihe ist das Interaktionsfeld, das nur dann interaktiv ist, wenn ein Zug möglich ist.
     
     
     
-    ## Hinweise
+## Hinweise
 
 Ich habe die vermutung das der AlphaBeta Algorithmus nicht 100% funktioniert, der Computer gewinnt nicht zu 100%, was allerdings zu einem "fairen" Spiel führen kann. Ich hatte versucht aus Pseudocode einen Alpha Beta Algorithmus abzuleiten, doch hat dieser nie richtig funktioniert. Irgendwann bin ich auf die C++ implementierung gestoßen und habe diese an meinen Code angepasst und habe dann erst erste gute Resultate bekommen. 
     
